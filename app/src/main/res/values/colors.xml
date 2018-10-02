@@ -2,6 +2,9 @@
 <resources>
     <color name="colorPrimary">#262626</color>
     <color name="colorPrimaryDark">#111111</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAccent">#d81b60</color>
     <color name="colorLowerBar">#ededed</color>
+    <color name="holoGreen">#277821</color>
+    <color name="holoRed">#b10f0f</color>
+    <color name="white">#ffffff</color>
 </resources>

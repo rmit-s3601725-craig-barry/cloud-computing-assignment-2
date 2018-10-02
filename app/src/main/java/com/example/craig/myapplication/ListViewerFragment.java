@@ -1,12 +1,14 @@
 package com.example.craig.myapplication;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,13 +24,10 @@ import com.example.craig.myapplication.common.User;
 import com.example.craig.myapplication.util.FB;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ListViewerFragment
     extends TitledFragment
@@ -152,7 +151,6 @@ public class ListViewerFragment
                 }
                 catch(Exception e)
                 {
-//                    e.printStackTrace();
                     throw e;
                 }
 
@@ -173,6 +171,7 @@ public class ListViewerFragment
         View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.list_item_icon, null);
         final TextView txt =  viewInflated.findViewById(R.id.list_name);
         final CheckBox checkBox = viewInflated.findViewById(R.id.checkbox);
+        final CardView cardView = viewInflated.findViewById(R.id.list_item_card_view);
         txt.setText(item);
         checkBox.setChecked(checked);
 
