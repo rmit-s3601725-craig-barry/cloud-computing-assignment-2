@@ -1,6 +1,7 @@
 package com.example.craig.myapplication.util;
 
 import android.support.annotation.NonNull;
+import android.util.Pair;
 
 import com.example.craig.myapplication.common.CollabList;
 import com.example.craig.myapplication.common.Invite;
@@ -89,17 +90,27 @@ public class FB
     public static void addListItem(final String listId, final String item)
     {
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference listRef = database.getReference(LISTS + DELIM + listId);
+
         changeListData(listId, (list) -> {
             ListItem listItem = new ListItem(item);
-            list.addItem(listItem);
+            final DatabaseReference listRef = database.getReference(LISTS + DELIM + listId + DELIM + ITEMS);
+            final DatabaseReference itemRef = listRef.push();
+            listItem.setUid(itemRef.getKey());
+            list.addItem(new Pair<>(listItem.getUid(), listItem));
         });
     }
 
-    public static void checkListItem(final String listId, final int listItemIdx, final boolean checked)
+    public static void rmListItem(final String listId, final String listItemId)
+    {
+        changeListData(listId, (list) -> {
+            list.removeItem(listItemId);
+        });
+    }
+
+    public static void checkListItem(final String listId, final String listItemId, final boolean checked)
     {
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        String checkedPath = LISTS + DELIM + listId + DELIM + ITEMS + DELIM + listItemIdx + DELIM + CHECKED;
+        String checkedPath = LISTS + DELIM + listId + DELIM + ITEMS + DELIM + listItemId + DELIM + CHECKED;
         final DatabaseReference checkedRef = database.getReference(checkedPath);
         checkedRef.setValue(checked);
     }

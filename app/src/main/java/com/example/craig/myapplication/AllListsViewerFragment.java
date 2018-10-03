@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.example.craig.myapplication.common.CollabList;
 import com.example.craig.myapplication.common.User;
 import com.example.craig.myapplication.util.FB;
+import com.example.craig.myapplication.util.SetDifference;
+import com.example.craig.myapplication.util.Transitions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,6 +27,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AllListsViewerFragment
     extends TitledFragment
@@ -32,12 +37,15 @@ public class AllListsViewerFragment
     private View view;
     private ArrayList<CollabList> lists = new ArrayList<>();
     private ValueEventListener userUpdateListener = null;
+    private User curUser = null;
+    private Map<String, View> listMap;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setFragmentTitle("Lists");
         view = inflater.inflate(R.layout.fragment_all_list_viewer, container, false);
+        listMap = new HashMap<>();
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -76,6 +84,7 @@ public class AllListsViewerFragment
             }
         });
 
+        curUser = null;
         initLists();
 
         return view;
@@ -87,23 +96,40 @@ public class AllListsViewerFragment
         userUpdateListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
-                User usr = data.getValue(User.class);
-                for(String listId: usr.getListIds())
+                List<String> addListIds = null;
+                List<String> rmListIds = new ArrayList<>();
+                User newUser = data.getValue(User.class);
+                if(newUser == null || !data.exists())
+                    return;
+                else if(curUser == null) {
+                    curUser = newUser;
+                    addListIds = curUser.getListIds();
+                }
+                else
+                {
+                    addListIds = SetDifference.getAdditions(curUser.getListIds(), newUser.getListIds());
+                    rmListIds = SetDifference.getRemovals(curUser.getListIds(), newUser.getListIds());
+                }
+
+                for(String listId: addListIds)
                 {
                     LinearLayout root = view.findViewById(R.id.list_layout);
-                    root.removeAllViews();
+//                    root.removeAllViews();
                     database.getReference("lists/" + listId).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot data) {
                             try
                             {
                                 CollabList list = data.getValue(CollabList.class);
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        addListItem(list.getUid(), list.getListName());
-                                    }
-                                });
+                                if(list != null)
+                                {
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            addListItem(list.getUid(), list.getListName());
+                                        }
+                                    });
+                                }
                             }
                             catch(Exception e) {
                                 throw e;
@@ -114,6 +140,13 @@ public class AllListsViewerFragment
                         public void onCancelled(@NonNull DatabaseError databaseError) { }
                     });
                 }
+
+                for(String listId: rmListIds)
+                {
+                    removeListItem(listId);
+                }
+
+                curUser = newUser;
             }
 
             @Override
@@ -141,14 +174,22 @@ public class AllListsViewerFragment
 
         viewInflated.setOnClickListener(clickListener);
         txt.setOnClickListener(clickListener);
-        root.addView(viewInflated);
+        listMap.put(listUid, viewInflated);
+        Transitions.addElement(root, viewInflated);
+    }
+
+    public void removeListItem(final String listUid) {
+        LinearLayout root = view.findViewById(R.id.list_layout);
+        if (listMap.get(listUid) != null) {
+            root.removeView(listMap.get(listUid));
+            listMap.remove(listUid);
+        }
     }
 
     public void addList(final String listName)
     {
         CollabList newList = FB.createNewList(listName, MainActivity.userID);
         lists.add(newList);
-//        addListItem(newList.getUid(), newList.getListName());
     }
 
     @Override

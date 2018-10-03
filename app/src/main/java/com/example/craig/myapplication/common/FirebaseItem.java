@@ -10,5 +10,16 @@ public abstract class FirebaseItem {
         this.uid = uid;
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if(o instanceof FirebaseItem)
+        {
+            return this.uid.equals(((FirebaseItem) o).uid);
+        }
+
+        return false;
+    }
+
     private String uid;
 }

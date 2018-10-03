@@ -26,6 +26,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.craig.myapplication.common.User;
+import com.example.craig.myapplication.global.Global;
+import com.example.craig.myapplication.global.GlobalFactory;
 import com.example.craig.myapplication.util.DownloadImageTask;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.ResultCallback;
@@ -119,13 +121,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void signOut() {
-        FirebaseAuth.getInstance().signOut();
+
+//        Auth.GoogleSignInApi.signOut(LoginActivity.mGoogleApiClient).setResultCallback((status) -> {
+//            FirebaseAuth.getInstance().signOut();
+//
+//
+//        });
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                FirebaseAuth.getInstance().signOut();
+
                 Intent myIntent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(myIntent);
             }
         });
+
     }
 }

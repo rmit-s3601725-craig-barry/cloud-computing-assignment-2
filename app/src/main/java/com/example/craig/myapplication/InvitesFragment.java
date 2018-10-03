@@ -15,29 +15,33 @@ import android.widget.TextView;
 import com.example.craig.myapplication.common.Invite;
 import com.example.craig.myapplication.util.DownloadImageTask;
 import com.example.craig.myapplication.util.FB;
+import com.example.craig.myapplication.util.SetDifference;
+import com.example.craig.myapplication.util.Transitions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InvitesFragment
     extends TitledFragment
 {
     private View view;
     private ValueEventListener invitesUpdateListener = null;
+    private List<Invite> inviteList;
+    private Map<String, View> inviteViews;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setFragmentTitle("Invites");
         view = inflater.inflate(R.layout.fragment_invites_viewer, container, false);
-
-        //TODO - Initialization
-//        for(int i = 0; i < 5; i++)
-//        {
-//            addInviteUI(Integer.toString(i), "List " + (i+1), MainActivity.userName, MainActivity.userPhotoUrl);
-//        }
-
+        inviteList = new ArrayList<>();
+        inviteViews = new HashMap<>();
         initInvites();
 
         return view;
@@ -49,13 +53,22 @@ public class InvitesFragment
         invitesUpdateListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
-                LinearLayout root = view.findViewById(R.id.list_layout);
-                root.removeAllViews();
+                List<Invite> nInviteList = new ArrayList<>();
                 for(DataSnapshot child : data.getChildren())
                 {
                     Invite inv = child.getValue(Invite.class);
-                    addInviteUI(inv);
+                    nInviteList.add(inv);
                 }
+
+                List<Invite> addedInvites = SetDifference.getAdditions(inviteList, nInviteList);
+                List<Invite> removedInvites = SetDifference.getRemovals(inviteList, nInviteList);
+
+                inviteList = nInviteList;
+
+                for(Invite inv : removedInvites)
+                    removeInviteUI(inv);
+                for(Invite inv : addedInvites)
+                    addInviteUI(inv);
             }
 
             @Override
@@ -100,8 +113,19 @@ public class InvitesFragment
         new DownloadImageTask(img).execute(invite.getUserPhotoUrl());
         listNameField.setText("List: " + invite.getListName());
         invitedByField.setText(invite.getUserName() + " has invited you to collaborate");
+        inviteViews.put(invite.getUid(), inviteCard);
 
-        root.addView(inviteCard);
+        Transitions.addElement(root, inviteCard);
+    }
+
+    private void removeInviteUI(Invite invite)
+    {
+        LinearLayout root = view.findViewById(R.id.list_layout);
+        if(inviteViews.get(invite.getUid()) != null)
+        {
+            root.removeView(inviteViews.get(invite.getUid()));
+            inviteViews.remove(invite.getUid());
+        }
     }
 
     @Override
