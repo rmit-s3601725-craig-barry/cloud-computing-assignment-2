@@ -39,6 +39,12 @@ public class Transitions
         }, delay);
     }
 
+    public static final void removeElement(ViewGroup root, View item)
+    {
+        setupTransition(root);
+        root.removeView(item);
+    }
+
     private static int nElements = 0;
 
     private final static int TRANSITION_DELAY = 120;

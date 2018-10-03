@@ -56,6 +56,46 @@ public class FB
         return newList;
     }
 
+    public static void destroyList(String listUid)
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference listRef = database.getReference(LISTS + DELIM + listUid);
+        //Retrieve the list object
+        listRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot data) {
+                if(data != null && data.exists())
+                {
+                    CollabList list = data.getValue(CollabList.class);
+                    //Iterate over each list participant
+                    for(String userId: list.getParticipants())
+                    {
+                        //Remove this list from the user
+                        changeUserData(userId, (user) -> {
+                            user.removeList(listUid);
+                        });
+                    }
+                }
+                //Remove the list from the database
+                listRef.setValue(null);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+
+    }
+
+    public static void removeUserFromList(String listUid, String userId)
+    {
+        changeUserData(userId, (user) -> {
+            user.removeList(listUid);
+        });
+        changeListData(listUid, (list) -> {
+            list.removeParticipant(userId);
+        });
+    }
+
     public static void sendInvite(String listId, String listName, String targetUserId, String srcUserName, String srcUserPhotoUrl)
     {
         Invite inv = new Invite(targetUserId, listId);
@@ -76,6 +116,10 @@ public class FB
 
         changeUserData(invite.getUserId(), (usr) -> {
             usr.addList(invite.getListId());
+        });
+
+        changeListData(invite.getListId(), (list) -> {
+            list.addParticipant(invite.getUserId());
         });
     }
 

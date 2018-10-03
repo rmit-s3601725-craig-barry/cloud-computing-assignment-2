@@ -7,11 +7,14 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -39,6 +42,7 @@ public class AllListsViewerFragment
     private ValueEventListener userUpdateListener = null;
     private User curUser = null;
     private Map<String, View> listMap;
+    private String selectedListId;
 
     @Nullable
     @Override
@@ -70,7 +74,7 @@ public class AllListsViewerFragment
                     public void onClick(DialogInterface dialog, int which) {
                         m_Text = input.getText().toString();
                         addList(m_Text);
-                        Snackbar.make(view, "Added new list: " + m_Text, Snackbar.LENGTH_LONG)
+                        Snackbar.make(view, "Created new list: " + m_Text, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
                 });
@@ -162,8 +166,14 @@ public class AllListsViewerFragment
 
         View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.list_icon, null);
         final TextView txt =  viewInflated.findViewById(R.id.list_name);
+        final ImageButton btnSettings = viewInflated.findViewById(R.id.btn_settings);
         txt.setText(listName);
 
+        registerForContextMenu(btnSettings);
+        btnSettings.setOnClickListener((view ) -> {
+            selectedListId = listUid;
+            getActivity().openContextMenu(view);
+        });
         View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,6 +200,28 @@ public class AllListsViewerFragment
     {
         CollabList newList = FB.createNewList(listName, MainActivity.userID);
         lists.add(newList);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+    {
+        super.onCreateContextMenu(menu,v,menuInfo);
+        getActivity().getMenuInflater().inflate(R.menu.list_settings, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                FB.destroyList(selectedListId);
+                removeListItem(selectedListId);
+                return true;
+            case R.id.menu_leave:
+                FB.removeUserFromList(selectedListId, MainActivity.userID);
+                removeListItem(selectedListId);
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     @Override

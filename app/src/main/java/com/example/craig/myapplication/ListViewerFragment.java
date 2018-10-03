@@ -1,5 +1,6 @@
 package com.example.craig.myapplication;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.CardView;
 import android.transition.Slide;
 import android.transition.TransitionManager;
@@ -136,8 +138,6 @@ public class ListViewerFragment
                     public void onClick(DialogInterface dialog, int which) {
                         m_Text = input.getText().toString();
                         addListItem(m_Text, false);
-                        Snackbar.make(view, "Added item to list: " + m_Text, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -239,7 +239,7 @@ public class ListViewerFragment
     {
         LinearLayout root = view.findViewById(R.id.list_layout);
         if (listItemViews.get(listItemId) != null) {
-            root.removeView(listItemViews.get(listItemId));
+            Transitions.removeElement(root, listItemViews.get(listItemId));
             listItemViews.remove(listItemId);
         }
     }
@@ -258,11 +258,18 @@ public class ListViewerFragment
         FB.sendInvite(listID, listName, userID, MainActivity.userName, MainActivity.userPhotoUrl);
     }
 
+    //Used to remove setOptionalIconsVisible linting bug, as shown here:
+    //https://stackoverflow.com/questions/48607853/menubuilder-setoptionaliconsvisible-can-only-be-called-from-within-the-same-libr
+    @SuppressLint("RestrictedApi")
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
     {
         super.onCreateContextMenu(menu,v,menuInfo);
         getActivity().getMenuInflater().inflate(R.menu.list_item_settings, menu);
+        if(menu instanceof MenuBuilder){
+            MenuBuilder m = (MenuBuilder) menu;
+            m.setOptionalIconsVisible(true);
+        }
     }
 
     @Override
@@ -276,8 +283,6 @@ public class ListViewerFragment
                 return super.onContextItemSelected(item);
         }
     }
-
-
 
     @Override
     public void onDestroy()

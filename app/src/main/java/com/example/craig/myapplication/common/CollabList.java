@@ -37,6 +37,14 @@ public class CollabList
         this.participants = participants;
     }
 
+    public void addParticipant(String userId) {
+        this.participants.add(userId);
+    }
+
+    public void removeParticipant(String userId) {
+        this.participants.remove(userId);
+    }
+
     public Map<String, ListItem> getItems() {
         return items;
     }
@@ -49,8 +57,7 @@ public class CollabList
         this.items.put(item.first, item.second);
     }
 
-    public void removeItem(String listItemId)
-    {
+    public void removeItem(String listItemId) {
         items.remove(listItemId);
     }
 
