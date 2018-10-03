@@ -4,22 +4,29 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.view.ContextMenu;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.craig.myapplication.common.CollabList;
 import com.example.craig.myapplication.common.User;
+import com.example.craig.myapplication.util.ClickGestureDetector;
+import com.example.craig.myapplication.util.DownloadImageTask;
 import com.example.craig.myapplication.util.FB;
 import com.example.craig.myapplication.util.SetDifference;
 import com.example.craig.myapplication.util.Transitions;
@@ -130,7 +137,7 @@ public class AllListsViewerFragment
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            addListItem(list.getUid(), list.getListName());
+                                            addListItem(list);
                                         }
                                     });
                                 }
@@ -160,9 +167,11 @@ public class AllListsViewerFragment
         database.getReference("users/" + MainActivity.userID).addValueEventListener(userUpdateListener);
     }
 
-    public void addListItem(final String listUid, final String listName)
+    public void addListItem(final CollabList list)
     {
         LinearLayout root = view.findViewById(R.id.list_layout);
+        final String listName = list.getListName();
+        final String listUid = list.getUid();
 
         View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.list_icon, null);
         final TextView txt =  viewInflated.findViewById(R.id.list_name);
@@ -182,8 +191,36 @@ public class AllListsViewerFragment
             }
         };
 
+        final LinearLayout userImgsLayout = viewInflated.findViewById(R.id.list_users);
+        final HorizontalScrollView scrollView = viewInflated.findViewById(R.id.scroll_view);
+        final ConstraintLayout layoutMgr = viewInflated.findViewById(R.id.layout_mgr);
+        for(String userId : list.getParticipants())
+        {
+            View userPhotoView = LayoutInflater.from(getContext()).inflate(R.layout.circle_img, userImgsLayout, false);
+            final ImageView img = userPhotoView.findViewById(R.id.user_image);
+            userImgsLayout.addView(userPhotoView);
+            userPhotoView.setOnClickListener(clickListener);
+
+            FB.getUserPhotoUrl(userId, (userPhotoUrl) -> {
+                getActivity().runOnUiThread( () -> {
+                    new DownloadImageTask(img).execute(userPhotoUrl);
+                });
+            });
+        }
+
+        final GestureDetector detector = new GestureDetector(getContext(), new ClickGestureDetector((x) -> {
+            clickListener.onClick(view);
+        }));
+
         viewInflated.setOnClickListener(clickListener);
         txt.setOnClickListener(clickListener);
+        userImgsLayout.setOnClickListener(clickListener);
+        scrollView.setOnClickListener(clickListener);
+        scrollView.setOnTouchListener((view, event) -> {
+            detector.onTouchEvent(event);
+            return false;
+        });
+        layoutMgr.setOnClickListener(clickListener);
         listMap.put(listUid, viewInflated);
         Transitions.addElement(root, viewInflated);
     }

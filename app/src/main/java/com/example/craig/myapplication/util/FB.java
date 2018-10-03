@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Pair;
 
 import com.example.craig.myapplication.common.CollabList;
+import com.example.craig.myapplication.common.FirebaseItem;
 import com.example.craig.myapplication.common.Invite;
 import com.example.craig.myapplication.common.ListItem;
 import com.example.craig.myapplication.common.User;
@@ -33,6 +34,25 @@ public class FB
                 usr.setPhotoUrl(userPhotoUri);
                 usr.setUid(userUid);
                 FirebaseDatabase.getInstance().getReference(userRefPath).setValue(usr);
+        });
+    }
+
+    public static void getUserPhotoUrl(String userId, Callback<String> callback)
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference imgRef = database.getReference(USERS + DELIM + userId + DELIM + PHOTO_URL);
+        imgRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot data) {
+                if(data.exists())
+                {
+                    String photoUrl = (String)data.getValue();
+                    callback.callback(photoUrl);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
     }
 
@@ -238,4 +258,5 @@ public class FB
     private static final String INVITES = "invites";
     private static final String ITEMS = "items";
     private static final String CHECKED = "checked";
+    private static final String PHOTO_URL = "photoUrl";
 }
