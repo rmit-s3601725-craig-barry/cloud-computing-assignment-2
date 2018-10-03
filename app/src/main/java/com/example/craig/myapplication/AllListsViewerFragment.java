@@ -1,5 +1,6 @@
 package com.example.craig.myapplication;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,11 +29,11 @@ import com.example.craig.myapplication.common.User;
 import com.example.craig.myapplication.util.ClickGestureDetector;
 import com.example.craig.myapplication.util.DownloadImageTask;
 import com.example.craig.myapplication.util.FB;
+import com.example.craig.myapplication.util.LoadingDialog;
 import com.example.craig.myapplication.util.SetDifference;
 import com.example.craig.myapplication.util.Transitions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -57,6 +58,8 @@ public class AllListsViewerFragment
         setFragmentTitle("Lists");
         view = inflater.inflate(R.layout.fragment_all_list_viewer, container, false);
         listMap = new HashMap<>();
+
+        LoadingDialog.showLoading(getContext(), "Loading...");
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -121,6 +124,9 @@ public class AllListsViewerFragment
                     addListIds = SetDifference.getAdditions(curUser.getListIds(), newUser.getListIds());
                     rmListIds = SetDifference.getRemovals(curUser.getListIds(), newUser.getListIds());
                 }
+
+                if(addListIds.size() == 0)
+                    LoadingDialog.stopLoading();
 
                 for(String listId: addListIds)
                 {
@@ -222,6 +228,7 @@ public class AllListsViewerFragment
         });
         layoutMgr.setOnClickListener(clickListener);
         listMap.put(listUid, viewInflated);
+        LoadingDialog.stopLoading();
         Transitions.addElement(root, viewInflated);
     }
 

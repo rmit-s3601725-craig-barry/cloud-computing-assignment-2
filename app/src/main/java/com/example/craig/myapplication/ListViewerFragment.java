@@ -35,6 +35,7 @@ import com.example.craig.myapplication.common.CollabList;
 import com.example.craig.myapplication.common.ListItem;
 import com.example.craig.myapplication.common.User;
 import com.example.craig.myapplication.util.FB;
+import com.example.craig.myapplication.util.LoadingDialog;
 import com.example.craig.myapplication.util.SetDifference;
 import com.example.craig.myapplication.util.Transitions;
 import com.google.firebase.database.DataSnapshot;
@@ -77,6 +78,8 @@ public class ListViewerFragment
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setFragmentTitle(listName);
         view = inflater.inflate(R.layout.fragment_list_viewer, container, false);
+
+        LoadingDialog.showLoading(getContext(), "Loading...");
 
         listItems = new ArrayList<>();
         listItemViews = new HashMap<>();
@@ -173,6 +176,7 @@ public class ListViewerFragment
                         List<ListItem> addedListItems = SetDifference.getAdditions(curListItems, newListItems);
                         List<ListItem> removedListItems = SetDifference.getRemovals(curListItems, newListItems);
 
+
                         for(ListItem listItem : addedListItems)
                             addListItemUI(listItem.getItem(), listItem.isChecked(), listItem.getUid());
                         for(ListItem listItem : removedListItems)
@@ -187,6 +191,7 @@ public class ListViewerFragment
                     }
                     else
                     {
+                        LoadingDialog.stopLoading();
                         for(ListItem listItem : list.getItems().values())
                             addListItemUI(listItem.getItem(), listItem.isChecked(), listItem.getUid());
                     }

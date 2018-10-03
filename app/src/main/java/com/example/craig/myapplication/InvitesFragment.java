@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.craig.myapplication.common.Invite;
 import com.example.craig.myapplication.util.DownloadImageTask;
 import com.example.craig.myapplication.util.FB;
+import com.example.craig.myapplication.util.LoadingDialog;
 import com.example.craig.myapplication.util.SetDifference;
 import com.example.craig.myapplication.util.Transitions;
 import com.google.firebase.database.DataSnapshot;
@@ -40,6 +41,7 @@ public class InvitesFragment
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setFragmentTitle("Invites");
         view = inflater.inflate(R.layout.fragment_invites_viewer, container, false);
+        LoadingDialog.showLoading(getContext(), "Loading...");
         inviteList = new ArrayList<>();
         inviteViews = new HashMap<>();
         initInvites();
@@ -63,6 +65,7 @@ public class InvitesFragment
                 List<Invite> addedInvites = SetDifference.getAdditions(inviteList, nInviteList);
                 List<Invite> removedInvites = SetDifference.getRemovals(inviteList, nInviteList);
 
+                LoadingDialog.stopLoading();
                 inviteList = nInviteList;
 
                 for(Invite inv : removedInvites)

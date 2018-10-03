@@ -47,6 +47,6 @@ public class Transitions
 
     private static int nElements = 0;
 
-    private final static int TRANSITION_DELAY = 120;
+    private final static int TRANSITION_DELAY = 90;
     private final static int TRANSITION_SPEED = 400;
 }
