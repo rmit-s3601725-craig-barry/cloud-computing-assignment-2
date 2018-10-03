@@ -33,10 +33,12 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="5e5e5e" />
-                            <entry key="outputName" value="ic_assignment" />
+                            <entry key="color" value="ffffff" />
+                            <entry key="height" value="128" />
+                            <entry key="outputName" value="ic_logo" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\Craig" />
+                            <entry key="width" value="128" />
                           </map>
                         </option>
                       </PersistentState>
