@@ -67,12 +67,13 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        userEmail = currentUser.getEmail();
-        userName = currentUser.getDisplayName();
-        userID = User.createUid(userEmail);
-        userPhotoUrl = currentUser.getPhotoUrl().toString();
 
         if (currentUser != null) {
+            userEmail = currentUser.getEmail();
+            userName = currentUser.getDisplayName();
+            userID = User.createUid(userEmail);
+            userPhotoUrl = currentUser.getPhotoUrl().toString();
+
             View navHeader = navigationView.getHeaderView(0);
             TextView name = navHeader.findViewById(R.id.user_name);
             TextView email = navHeader.findViewById(R.id.user_email);

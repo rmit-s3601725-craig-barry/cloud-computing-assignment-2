@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 
 import com.example.craig.myapplication.global.Global;
@@ -38,6 +39,11 @@ public class LoginActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().hide();
+        if(getActionBar() != null)
+            getActionBar().hide();
         setContentView(R.layout.sign_in_layout);
 
         final Button signInButton = findViewById(R.id.googleSignInBtn);
